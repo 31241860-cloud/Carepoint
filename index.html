@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CarePoint | AI Doctor Recommendation</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="{{ url_for('index') }}"><span class="brand-icon">✚</span> CarePoint</a>
+  <nav><a class="active" href="{{ url_for('index') }}">AI Recommendation</a><a href="{{ url_for('doctors_page') }}">Doctors</a><a href="{{ url_for('appointments') }}">Appointments</a></nav>
+</header>
+<main>
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">SMART HOSPITAL MANAGEMENT SYSTEM</p>
+      <h1>Find the right specialist.<br><span>Start with CarePoint.</span></h1>
+      <p class="hero-text">Describe your health concern in everyday language. Our demo NLP recommendation tool suggests a medical specialty and sample doctors to help you decide where to start.</p>
+      <div class="trust-row"><span>✓ Simple appointment booking</span><span>✓ NLP-based recommendation</span></div>
+    </div>
+    <div class="hero-card"><div class="pulse">✚</div><p class="card-label">SMART CARE</p><h3>Care begins with the right direction.</h3><p>Recommendations are informational, not a diagnosis.</p></div>
+  </section>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}{% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}{% endif %}
+  {% endwith %}
+
+  <section class="panel">
+    <div class="section-heading"><div><p class="eyebrow">AI ASSISTANT</p><h2>What health concern can we help route?</h2></div><span class="step-pill">01 / Describe</span></div>
+    <form method="POST" action="{{ url_for('index') }}" class="recommend-form">
+      <label for="problem">Describe the health problem</label>
+      <textarea id="problem" name="problem" rows="3" required minlength="3" placeholder="Example: I have a toothache and my gums are swollen...">{{ problem }}</textarea>
+      <div class="form-bottom"><p>Tip: Include a few words about the concern for a better text match.</p><button type="submit" class="button primary">✨ Recommend a specialist</button></div>
+    </form>
+    <div class="examples"><span>Try an example:</span>
+      <button type="button" class="chip" data-example="toothache and gum swelling">Dental issue</button>
+      <button type="button" class="chip" data-example="bone fracture and knee joint pain">Bone / joint</button>
+      <button type="button" class="chip" data-example="skin rash and itching">Skin issue</button>
+      <button type="button" class="chip" data-example="cancer treatment consultation">Cancer care</button>
+      <button type="button" class="chip" data-example="stomach pain and indigestion">Digestive issue</button>
+    </div>
+  </section>
+
+  {% if recommendation %}
+  <section class="result-section">
+    <div class="result-banner"><div><p class="eyebrow">AI SUGGESTION</p><h2>{{ recommendation }}</h2><p>Based on text similarity between your description and example health concerns in the demo dataset.</p></div><div class="result-symbol">✚</div></div>
+    <div class="result-meta"><span>Text-match score: {{ score_pct }}%</span><span>Not a diagnosis or clinical confidence score</span></div>
+    <h3 class="doctors-title">Sample doctors in this specialty</h3>
+    <div class="doctor-grid">
+      {% for doctor in doctors %}
+      <article class="doctor-card">
+        <div class="doctor-avatar">{{ doctor.name.split(' ')[1][0] if doctor.name.split()|length > 1 else 'D' }}</div>
+        <div class="doctor-info"><h3>{{ doctor.name }}</h3><p>{{ doctor.qualification }}</p><span>{{ doctor.experience }} experience · Demo profile</span></div>
+        <form method="POST" action="{{ url_for('book') }}" class="booking-form">
+          <input type="hidden" name="problem" value="{{ problem }}">
+          <input type="hidden" name="specialist" value="{{ recommendation }}">
+          <input type="hidden" name="doctor_name" value="{{ doctor.name }}">
+          <label>Patient name<input name="patient_name" required placeholder="Your name"></label>
+          <label>Email<input type="email" name="email" required placeholder="you@example.com"></label>
+          <label>Preferred date<input type="date" name="appointment_date" required min="{{ '' }}"></label>
+          <button class="button secondary" type="submit">Book demo appointment →</button>
+        </form>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="disclaimer"><strong>Important:</strong> This is a college demonstration prototype using a small sample dataset and fictional doctor profiles. It does not diagnose conditions or replace a qualified healthcare professional. For chest pain, severe breathing difficulty, stroke symptoms, major injury, or another emergency, contact local emergency services immediately.</section>
+</main>
+<footer>© 2026 CarePoint · Smart Hospital Management System · Academic demo</footer>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body></html>
